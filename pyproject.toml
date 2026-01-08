@@ -9,6 +9,7 @@ dependencies = []
 [dependency-groups]
 dev = [
     "apache-airflow==2.9.3",
+    "pytest>=9.0.2",
     "ruff>=0.14.10",
 ]
 
