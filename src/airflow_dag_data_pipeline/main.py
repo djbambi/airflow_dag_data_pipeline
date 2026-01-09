@@ -1,3 +1,16 @@
+"""
+Entry point for fetching historical weather data from the OpenWeather
+One Call API (Time Machine endpoint) and persisting the response locally.
+
+This script:
+- Reads configuration from environment variables
+- Creates a configured HTTP session
+- Fetches weather data for a fixed location and timestamp
+- Writes the raw JSON response to disk
+
+Intended for local experimentation and development.
+"""
+
 import json
 import os
 
@@ -14,6 +27,12 @@ DEFAULT_TIMEOUT = 10.0
 
 
 def main() -> None:
+    """
+    Orchestrates retrieval of historical weather data from OpenWeather
+    and saves the response to a local JSON file.
+
+    Expects the environment variable OPENWEATHER_API_KEY to be set.
+    """
     api_key = os.environ["OPENWEATHER_API_KEY"]
 
     params: dict[str, str | int | float] = {
