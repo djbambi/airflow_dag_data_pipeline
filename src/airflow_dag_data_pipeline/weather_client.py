@@ -1,3 +1,5 @@
+"""Client to fetch weather data from OpenWeather API"""
+
 from typing import Any
 
 import requests
