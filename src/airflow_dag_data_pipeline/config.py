@@ -1,27 +1,37 @@
-import os
-from dataclasses import dataclass
+"""config file containing variable data."""
+
+from pydantic import Field, HttpUrl
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-@dataclass(frozen=True)
-class OpenWeatherConfig:
-    api_key: str
-    timeout_s: float
+class Settings(BaseSettings):
+    """
+    Application configuration loaded from environment variables.
 
+    This class defines and validates all runtime configuration for the
+    OpenWeather data fetcher. Values are read from OS environment variables
+    or a local `.env` file (for development), validated on startup, and
+    exposed as typed Python attributes.
 
-def load_openweather_config() -> OpenWeatherConfig:
-    api_key = os.getenv("OPENWEATHER_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENWEATHER_API_KEY is not set")
+    Required environment variables:
+    - OPENWEATHER_API_KEY
 
-    try:
-        timeout_s = float(os.getenv("OPENWEATHER_TIMEOUT_S", "10"))
-    except ValueError as exc:
-        raise RuntimeError("OPENWEATHER_TIMEOUT_S must be a number") from exc
+    Optional environment variables:
+    - OPENWEATHER_BASE_URL (default provided)
+    - OPENWEATHER_TIMEOUT_S (default: 10.0)
+    """
 
-    if timeout_s <= 0:
-        raise RuntimeError("OPENWEATHER_TIMEOUT_S must be > 0")
+    openweather_api_key: str = Field(
+        min_length=1,
+        description="API key for the OpenWeather API",
+    )
+    openweather_timeout_s: float = Field(default=10.0, gt=0)
+    openweather_base_url: HttpUrl = Field(
+        default="https://api.openweathermap.org/data/3.0/onecall/timemachine",
+        description="OpenWeather Time Machine endpoint",
+    )
 
-    return OpenWeatherConfig(
-        api_key=api_key,
-        timeout_s=timeout_s,
+    model_config = SettingsConfigDict(
+        env_file=".env",  # optional, used for local dev
+        extra="ignore",  # ignore unrelated env vars
     )

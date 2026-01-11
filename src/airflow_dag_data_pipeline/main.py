@@ -1,18 +1,18 @@
 import json
 
 import requests
-from config import load_openweather_config
-from weather_client import BASE_URL, DEFAULT_HEADERS, fetch_openweather_data
+from config import Settings
+from weather_client import DEFAULT_HEADERS, fetch_openweather_data
 
 
 def main() -> None:
-    cfg = load_openweather_config()
+    settings = Settings()
 
     params = {
         "lat": 54.9069,
         "lon": -1.3838,
         "dt": 1767830400,
-        "appid": cfg.api_key,
+        "appid": settings.openweather_api_key,
         "units": "metric",
     }
 
@@ -21,9 +21,9 @@ def main() -> None:
 
     data = fetch_openweather_data(
         session=session,
-        url=BASE_URL,
+        url=str(settings.openweather_base_url),
         params=params,
-        timeout_s=cfg.timeout_s,
+        timeout_s=settings.openweather_timeout_s,
     )
 
     with open("weather_data.json", "w", encoding="utf-8") as f:
