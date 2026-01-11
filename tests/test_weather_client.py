@@ -66,3 +66,16 @@ def test_fetch_openweather_data_raises_when_status_is_error() -> None:
         )
 
     fake_response.json.assert_not_called()
+
+
+def test_fetch_openweather_data_raises_when_session_get_times_out() -> None:
+    fake_session = Mock()
+    fake_session.get.side_effect = TimeoutError("timed out")
+
+    with pytest.raises(TimeoutError, match="timed out"):
+        fetch_openweather_data(
+            session=fake_session,
+            url="https://example.com",
+            params={},
+            timeout_s=10.0,
+        )
