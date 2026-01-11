@@ -24,3 +24,25 @@ def test_fetch_openweather_data_returns_json_on_success() -> None:
 
     # Assert: we got back the JSON dict
     assert result == {"ok": True}
+
+def test_fetch_openweather_data_calls_session_get_with_expected_args() -> None:
+    fake_response = Mock()
+    fake_response.raise_for_status.return_value = None
+    fake_response.json.return_value = {}
+
+    fake_session = Mock()
+    fake_session.get.return_value = fake_response
+
+    url = "https://example.com/weather"
+    params = {"lat": 54.9, "lon": -1.3}
+    timeout_s = 7.5
+
+    fetch_openweather_data(
+        session=fake_session,
+        url=url,
+        params=params,
+        timeout_s=timeout_s,
+    )
+
+    fake_session.get.assert_called_once_with(url, params=params, timeout=timeout_s)
+    
