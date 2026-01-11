@@ -1,6 +1,5 @@
 """Client to fetch weather data from OpenWeather API"""
 
-BASE_URL = "https://api.openweathermap.org/data/3.0/onecall/timemachine"
 DEFAULT_HEADERS: dict[str, str] = {
     "User-Agent": "WeatherApp/1.0",
     "Accept": "application/json",
