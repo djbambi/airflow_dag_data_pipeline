@@ -8,13 +8,14 @@ format:
 lint:
 	uv run ruff check .
 
+# Auto-fix linting issues
+fix:
+	uv run ruff check . --fix
+
 # Run all checks (lint + format check)
 check:
 	uv run ruff check .
 	uv run ruff format --check .
-
-# Auto-fix linting issues
-fix:
 	uv run ruff check --fix .
 
 # Format and fix all issues
