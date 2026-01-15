@@ -1,8 +1,9 @@
 import json
 
 import requests
-from config import Settings
-from weather_client import DEFAULT_HEADERS, fetch_openweather_data
+
+from .config import Settings
+from .weather_client import DEFAULT_HEADERS, fetch_openweather_data
 
 
 def main() -> None:
