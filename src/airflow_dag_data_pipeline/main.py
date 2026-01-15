@@ -2,8 +2,11 @@ import json
 
 import requests
 
-from .config import Settings
-from .weather_client import DEFAULT_HEADERS, fetch_openweather_data
+from airflow_dag_data_pipeline.config import Settings
+from airflow_dag_data_pipeline.weather_client import (
+    DEFAULT_HEADERS,
+    fetch_openweather_data,
+)
 
 
 def main() -> None:
