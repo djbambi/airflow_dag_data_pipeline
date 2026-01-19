@@ -5,6 +5,9 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+      OPENWEATHER_API_KEY: "404a27b0b94eb317ba89052b0f3108f9"
+      OPENWEATHER_TIMEOUT_S: "10"
+      BASE_URL: "https://api.openweathermap.org/data/3.0/onecall/timemachine"
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
@@ -24,8 +27,13 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      PYTHONPATH: /opt/airflow/src
+      OPENWEATHER_API_KEY: "404a27b0b94eb317ba89052b0f3108f9"
+      OPENWEATHER_TIMEOUT_S: "10"
+      BASE_URL: "https://api.openweathermap.org/data/3.0/onecall/timemachine"
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
     command: >
       bash -c "
       airflow db upgrade &&
@@ -50,8 +58,13 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      PYTHONPATH: /opt/airflow/src
+      OPENWEATHER_API_KEY: "404a27b0b94eb317ba89052b0f3108f9"
+      OPENWEATHER_TIMEOUT_S: "10"
+      BASE_URL: "https://api.openweathermap.org/data/3.0/onecall/timemachine"
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
     ports:
       - "8080:8080"
     command: webserver
@@ -66,8 +79,14 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PYTHONPATH: /opt/airflow/src
+      _PIP_ADDITIONAL_REQUIREMENTS: "pydantic-settings"
+      OPENWEATHER_API_KEY: "404a27b0b94eb317ba89052b0f3108f9"
+      OPENWEATHER_TIMEOUT_S: "10"
+      BASE_URL: "https://api.openweathermap.org/data/3.0/onecall/timemachine"
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
     command: scheduler
     restart: unless-stopped
 
