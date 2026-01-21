@@ -1,5 +1,31 @@
 repos:
+  # -----------------------------
+  # Python formatting + linting
+  # -----------------------------
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.14
     hooks:
+      - id: ruff-format
       - id: ruff
+
+  # -----------------------------
+  # General repo hygiene checks
+  # -----------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-toml
+
+  # -----------------------------
+  # Run fast unit tests
+  # -----------------------------
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest -q
+        language: system
+        pass_filenames: false
