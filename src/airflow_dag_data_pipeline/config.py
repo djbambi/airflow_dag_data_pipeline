@@ -1,6 +1,6 @@
 """config file containing variable data."""
 
-from pydantic import Field, HttpUrl
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         description="API key for the OpenWeather API",
     )
     openweather_timeout_s: float = Field(default=10.0, gt=0)
-    openweather_base_url: HttpUrl = Field(
+    openweather_base_url: str = Field(
         default="https://api.openweathermap.org/data/3.0/onecall/timemachine",
         description="OpenWeather Time Machine endpoint",
     )
