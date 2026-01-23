@@ -12,7 +12,7 @@ from airflow_dag_data_pipeline.weather_client import (
 def main() -> None:
     settings = Settings()
 
-    params = {
+    params: dict[str, str | int | float] = {
         "lat": 54.9069,
         "lon": -1.3838,
         "dt": 1767830400,
