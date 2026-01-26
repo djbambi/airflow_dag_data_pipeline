@@ -1,17 +1,17 @@
 ## 2026-01-10 — Dependency injection of HTTP session
 
-**Decision**  
+**Decision**
 Inject a pre-configured `requests.Session` into the OpenWeather client functions,
 rather than creating the session inside the client.
 
-**Context**  
+**Context**
 The extraction logic makes HTTP requests to external APIs. The code needs to:
 - remain simple for local execution
 - avoid hidden dependencies on global state
 - be testable without making real HTTP calls
 - support future enhancements (retries, backoff, headers, adapters)
 
-**Decision rationale**  
+**Decision rationale**
 Creating the HTTP session outside the client and passing it in explicitly:
 
 - Keeps the client functions free of environment and configuration concerns
@@ -22,16 +22,16 @@ Creating the HTTP session outside the client and passing it in explicitly:
 This follows the principle that functions should depend on *what they need*,
 not *where it comes from*.
 
-**Alternatives considered**  
-- Creating a `requests.Session` inside the client  
+**Alternatives considered**
+- Creating a `requests.Session` inside the client
   Rejected because it hides dependencies, makes testing harder, and couples
   the client to specific configuration choices.
 
-- Using `requests.get(...)` directly  
+- Using `requests.get(...)` directly
   Rejected because it prevents reuse of connections and makes future retry
   and transport-level concerns harder to introduce cleanly.
 
-**Consequences**  
+**Consequences**
 - Slightly more wiring in `main.py`
 - Clear separation between orchestration and client logic
 - A natural place to introduce retries, backoff, logging, or adapters later
@@ -39,31 +39,31 @@ not *where it comes from*.
 
 ## 2026-01-11 — Configuration via Pydantic Settings
 
-**Decision**  
+**Decision**
 Use Pydantic Settings to load and validate environment-based configuration
 (API key, base URL, timeout).
 
-**Why**  
+**Why**
 - Avoid hard-coding secrets
 - Fail fast on misconfiguration
 - Keep client code free of environment concerns
 
-**Alternatives considered**  
+**Alternatives considered**
 - Direct `os.environ` access (simpler, but less robust)
 - Hard-coded constants (rejected)
 
-**Consequences**  
+**Consequences**
 - Adds a dependency on Pydantic
 - Makes future Airflow / CI integration easier
 
 ## 2026-01-11 — Freeze scope at MVP and shift focus to testing
 
-**Decision**  
+**Decision**
 Freeze the current implementation as a minimum viable product (MVP) and
 pause further architectural expansion in order to focus on testing and
 consolidation.
 
-**Context**  
+**Context**
 The initial design brief for this project was to create **simple Python
 extraction logic** for fetching weather data from an external API. During
 development, it became clear that the project could naturally expand into:
@@ -78,7 +78,7 @@ While these directions are valid, pursuing them immediately risked
 overcomplicating the code before the core extraction logic was proven and
 understood.
 
-**Decision rationale**  
+**Decision rationale**
 Freezing the project at the current MVP stage:
 
 - Keeps the implementation aligned with the original design brief
@@ -90,7 +90,7 @@ Freezing the project at the current MVP stage:
 At this stage, correctness, clarity, and confidence in behaviour are more
 valuable than additional features.
 
-**Next focus: testing**  
+**Next focus: testing**
 With a working MVP in place, the next priority is to introduce targeted tests,
 including:
 
@@ -101,13 +101,13 @@ including:
 This testing phase will help confirm that the current design choices are sound
 before extending the system further.
 
-**Alternatives considered**  
+**Alternatives considered**
 - Continuing immediately with retries, parameter builders, and partitioned
-  storage  
+  storage
   Rejected to avoid diluting focus and obscuring the learning goals of the
   exercise.
 
-**Consequences**  
+**Consequences**
 - Planned enhancements are explicitly deferred and tracked via GitHub Issues
 - The codebase remains small, readable, and easy to reason about
 - Future extensions can be made incrementally on top of a tested foundation
