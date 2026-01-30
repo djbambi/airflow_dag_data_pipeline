@@ -12,7 +12,7 @@ DEFAULT_HEADERS: dict[str, str] = {
     "Accept": "application/json",
 }
 
-log = logger.get_logger(f"{platform.node()} - Some System")
+log = logger.get_logger(f"{platform.node()} - Weather Client")
 
 
 def fetch_openweather_data(

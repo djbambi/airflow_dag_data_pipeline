@@ -9,6 +9,7 @@ from airflow_dag_data_pipeline.weather_client import (
 )
 
 
+
 def main() -> None:
     settings = Settings()
 
