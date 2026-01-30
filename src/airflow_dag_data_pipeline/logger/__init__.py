@@ -1,7 +1,7 @@
 import logging
 
 
-def get_logger(name):
+def get_logger(name: str) -> logging.Logger:
     log = logging.getLogger(name)
     handler = logging.FileHandler(filename="logs/log.txt", mode="a")
 
