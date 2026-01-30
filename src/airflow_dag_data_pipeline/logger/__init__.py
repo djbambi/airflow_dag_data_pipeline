@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -6,7 +7,13 @@ def get_logger(name: str) -> logging.Logger:
 
     # Configure the logger only once to avoid duplicate handlers and log entries
     if not log.handlers:
-        handler = logging.FileHandler(filename="logs/log.txt", mode="a")
+        # Create logs directory if it doesn't exist
+        log_dir = Path("logs")
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # Use pathlib for the log file path
+        log_file = log_dir / "log.txt"
+        handler = logging.FileHandler(filename=log_file, mode="a")
 
         format_str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         formatter = logging.Formatter(fmt=format_str, datefmt="%Y-%m-%d %H:%M:%S%z")

@@ -2,7 +2,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from airflow_dag_data_pipeline.weather_client import fetch_openweather_data
 
 
