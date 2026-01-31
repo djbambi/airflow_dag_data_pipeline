@@ -10,7 +10,7 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     schedule=None,  # manual trigger for now (simplest)
     catchup=False,
-) as dag:
+) as dag:  # noqa: F841
     run = PythonOperator(
         task_id="run_main",
         python_callable=main,

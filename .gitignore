@@ -26,3 +26,7 @@ weather_data.json
 
 # Environment vars file
 .env
+
+# Logs
+logs/
+*.log
