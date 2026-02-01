@@ -2,6 +2,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+
 from airflow_dag_data_pipeline.main import main
 
 with DAG(
