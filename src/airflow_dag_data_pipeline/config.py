@@ -31,6 +31,10 @@ class Settings(BaseSettings):
         description="OpenWeather Time Machine endpoint",
     )
 
+    max_retries: int = Field(default=3, ge=0, le=10)
+    retry_backoff_multiplier: float = Field(default=2.0, gt=0)
+    retry_max_wait_seconds: int = Field(default=60, gt=0)
+
     model_config = SettingsConfigDict(
         env_file=".env",  # optional, used for local dev
         extra="ignore",  # ignore unrelated env vars
