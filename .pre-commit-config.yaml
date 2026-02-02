@@ -3,11 +3,12 @@ repos:
   # Python formatting + linting
   # -----------------------------
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.14
+    rev: v0.8.4  # Updated to match closer to your local ruff version
     hooks:
       - id: ruff-format
       - id: ruff
         args: [--fix]
+
 
   # -----------------------------
   # General repo hygiene checks
@@ -27,6 +28,6 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest -q
+        entry: uv run pytest -q
         language: system
         pass_filenames: false
