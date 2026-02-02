@@ -3,10 +3,16 @@ from unittest.mock import Mock
 
 import pytest
 
+from airflow_dag_data_pipeline.config import Settings
 from airflow_dag_data_pipeline.weather_client import fetch_openweather_data
 
 
-def test_fetch_openweather_data_returns_json_on_success() -> None:
+@pytest.fixture
+def settings() -> Settings:
+    return Settings()
+
+
+def test_fetch_openweather_data_returns_json_on_success(settings: Settings) -> None:
     # Arrange: create a fake response
     fake_response = Mock()
     fake_response.raise_for_status.return_value = None
@@ -22,13 +28,16 @@ def test_fetch_openweather_data_returns_json_on_success() -> None:
         url="https://example.com",
         params={"a": 1},
         timeout_s=10.0,
+        settings=settings,
     )
 
     # Assert: we got back the JSON dict
     assert result == {"ok": True}
 
 
-def test_fetch_openweather_data_calls_session_get_with_expected_args() -> None:
+def test_fetch_openweather_data_calls_session_get_with_expected_args(
+    settings: Settings,
+) -> None:
     fake_response = Mock()
     fake_response.raise_for_status.return_value = None
     fake_response.json.return_value = {}
@@ -45,12 +54,13 @@ def test_fetch_openweather_data_calls_session_get_with_expected_args() -> None:
         url=url,
         params=params,
         timeout_s=timeout_s,
+        settings=settings,
     )
 
     fake_session.get.assert_called_once_with(url, params=params, timeout=timeout_s)
 
 
-def test_fetch_openweather_data_raises_when_status_is_error() -> None:
+def test_fetch_openweather_data_raises_when_status_is_error(settings: Settings) -> None:
     fake_response = Mock()
     fake_response.raise_for_status.side_effect = Exception("HTTP error")
 
@@ -63,12 +73,15 @@ def test_fetch_openweather_data_raises_when_status_is_error() -> None:
             url="https://example.com",
             params={},
             timeout_s=10.0,
+            settings=settings,
         )
 
     fake_response.json.assert_not_called()
 
 
-def test_fetch_openweather_data_raises_when_session_get_times_out() -> None:
+def test_fetch_openweather_data_raises_when_session_get_times_out(
+    settings: Settings,
+) -> None:
     fake_session = Mock()
     fake_session.get.side_effect = TimeoutError("timed out")
 
@@ -78,4 +91,5 @@ def test_fetch_openweather_data_raises_when_session_get_times_out() -> None:
             url="https://example.com",
             params={},
             timeout_s=10.0,
+            settings=settings,
         )

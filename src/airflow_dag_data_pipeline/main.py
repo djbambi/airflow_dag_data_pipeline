@@ -28,6 +28,7 @@ def main() -> None:
         url=str(settings.openweather_base_url),
         params=params,
         timeout_s=settings.openweather_timeout_s,
+        settings=settings,
     )
 
     with open("weather_data.json", "w", encoding="utf-8") as f:
