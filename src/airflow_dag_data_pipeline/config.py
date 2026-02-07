@@ -30,8 +30,8 @@ class Settings(BaseSettings):
         default="https://api.openweathermap.org/data/3.0/onecall/timemachine",
         description="OpenWeather Time Machine endpoint",
     )
-
-    max_retries: int = Field(default=3, ge=0, le=10)
+    retry_initial_wait_seconds: int = Field(default=1)
+    max_retry_attempts: int = Field(default=3, ge=0, le=10)
     retry_backoff_multiplier: float = Field(default=2.0, gt=0)
     retry_max_wait_seconds: int = Field(default=60, gt=0)
 
