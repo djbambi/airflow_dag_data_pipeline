@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from requests import Response, Session
 from tenacity import (
     after_log,
     before_sleep_log,
@@ -26,18 +27,22 @@ params: dict[str, str | int | float] = {
 logging.basicConfig(level=logging.INFO)
 
 
-def _should_retry(exception):
-    """Only retry transient errors."""
-    # Network errors - always retry
+def _should_retry(exception: BaseException) -> bool:
+    """Determine if an exception should trigger a retry.
+
+    Args:
+        exception: The exception that was raised
+
+    Returns:
+        True if the request should be retried, False otherwise
+    """
     if isinstance(exception, (requests.Timeout, requests.ConnectionError)):
         return True
 
     # HTTP errors - only retry specific codes
     if isinstance(exception, requests.HTTPError):
-        # Use 'is not None' instead of truthiness check
         if exception.response is not None:
-            status = exception.response.status_code
-            return status in {408, 429, 500, 502, 503, 504}
+            return exception.response.status_code in {408, 429, 500, 502, 503, 504}
 
     return False
 
@@ -47,22 +52,36 @@ DEFAULT_HEADERS: dict[str, str] = {
     "Accept": "application/json",
 }
 
-RETRY_CONFIG = {
-    "stop": stop_after_attempt(settings.max_retry_attempts),
-    "wait": wait_exponential_jitter(
+
+@retry(
+    stop=stop_after_attempt(settings.max_retry_attempts),
+    wait=wait_exponential_jitter(
         initial=settings.retry_initial_wait_seconds,
         max=settings.retry_max_wait_seconds,
         exp_base=settings.retry_backoff_multiplier,
     ),
-    "retry": retry_if_exception(_should_retry),
-    "before_sleep": before_sleep_log(logger, logging.WARNING),
-    "after": after_log(logger, logging.INFO),
-    "reraise": True,
-}
+    retry=retry_if_exception(_should_retry),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    after=after_log(logger, logging.INFO),
+    reraise=True,
+)
+def api_call(
+    session: Session,
+    url: str,
+    params: dict[str, str | int | float] | None = None,
+    timeout_s: float = 3.0,
+) -> Response:
+    """Make an HTTP GET request with retry logic.
 
+    Args:
+        session: requests Session object
+        url: URL to request
+        params: Query parameters (optional)
+        timeout_s: Request timeout in seconds
 
-@retry(**RETRY_CONFIG)
-def api_call(session, url, params=None, timeout_s=3):
+    Returns:
+        Response object from the HTTP request
+    """
     response = session.get(url, params=params, timeout=timeout_s)
     response.raise_for_status()
     return response
