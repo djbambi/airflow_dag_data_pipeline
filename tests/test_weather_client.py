@@ -1,4 +1,4 @@
-"""Tests for _should_retry function."""
+"""Tests for the weather client retry logic and API call behavior."""
 
 from unittest.mock import Mock
 
