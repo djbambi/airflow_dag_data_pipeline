@@ -69,7 +69,7 @@ def test_should_retry_on_retryable_http_status(status_code):
 
 
 @pytest.mark.parametrize(
-    "status_code", [pytest.param(400, id="Not Found"), 401, 403, 404, 405]
+    "status_code", [pytest.param(400, id="Bad Request"), 401, 403, 404, 405]
 )
 def test_should_not_retry_on_client_error_status(status_code):
     """HTTP client errors (4xx) should NOT be retried."""
