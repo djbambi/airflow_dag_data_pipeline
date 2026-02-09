@@ -29,7 +29,7 @@ def _should_retry(exception: BaseException) -> bool:
     if isinstance(exception, requests.Timeout):
         logger.debug("Retry triggered by Timeout exception")
         return True
-    
+
     if isinstance(exception, requests.ConnectionError):
         logger.debug("Retry triggered by ConnectionError exception")
         return True

@@ -109,7 +109,6 @@ def test_api_call_returns_expected_json(test_url, mock_session, successful_respo
 
 def test_api_call_returns_weather_key(test_url, mock_session, successful_response):
     """Test that successful API call returns weather key in JSON."""
-    _ = successful_response
     response = api_call(mock_session, test_url)
     assert "weather" in response.json()
 
