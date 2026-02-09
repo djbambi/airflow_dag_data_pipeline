@@ -27,13 +27,20 @@ def successful_response(test_url):
     with requests_mock.Mocker() as m:
         expected_data = {"weather": "sunny", "temp": 20}
         m.get(test_url, status_code=200, json=expected_data)
-        yield m, expected_data
+        yield expected_data
 
 
-def test_should_retry_on_timeout():
-    """Timeout errors should be retried."""
+@pytest.mark.parametrize(
+    "exception_type,exception_args",
+    [
+        pytest.param(requests.Timeout, {}, id="timeout"),
+        pytest.param(requests.ConnectionError, {}, id="connection_error"),
+    ],
+)
+def test_should_retry_on_network_errors(exception_type, exception_args):
+    """Network errors (timeout, connection) should be retried."""
     # Arrange: Create the exception
-    exception = requests.Timeout()
+    exception = exception_type(**exception_args)
 
     # Act: Call the function
     result = _should_retry(exception)
@@ -42,19 +49,14 @@ def test_should_retry_on_timeout():
     assert result is True
 
 
-def test_should_retry_on_connection_error():
-    """Connection errors should be retried."""
-    # Arrange: Create the exception
-    exception = requests.ConnectionError()
-
-    # Act: Call the function
-    result = _should_retry(exception)
-
-    # Assert: Check it returns True
-    assert result is True
-
-
-@pytest.mark.parametrize("status_code", [408, 429, 500, 502, 503, 504])
+@pytest.mark.parametrize("status_code", [
+    pytest.param(408, id="request_timeout"),
+    pytest.param(429, id="too_many_requests"),
+    pytest.param(500, id="internal_server_error"),
+    pytest.param(502, id="bad_gateway"),
+    pytest.param(503, id="service_unavailable"),
+    pytest.param(504, id="gateway_timeout"),
+])
 def test_should_retry_on_retryable_http_status(status_code):
     """HTTP errors with retryable status codes should be retried."""
     # Arrange: Create HTTPError with the given status code
@@ -69,7 +71,14 @@ def test_should_retry_on_retryable_http_status(status_code):
 
 
 @pytest.mark.parametrize(
-    "status_code", [pytest.param(400, id="Bad Request"), 401, 403, 404, 405]
+    "status_code",
+    [
+        pytest.param(400, id="bad_request"),
+        pytest.param(401, id="unauthorized"),
+        pytest.param(403, id="forbidden"),
+        pytest.param(404, id="not_found"),
+        pytest.param(405, id="method_not_allowed"),
+    ],
 )
 def test_should_not_retry_on_client_error_status(status_code):
     """HTTP client errors (4xx) should NOT be retried."""
@@ -86,21 +95,21 @@ def test_should_not_retry_on_client_error_status(status_code):
 
 def test_api_call_returns_200_status(test_url, mock_session, successful_response):
     """Test that successful API call returns 200 status."""
-    m, expected_data = successful_response
+    expected_data = successful_response
     response = api_call(mock_session, test_url)
     assert response.status_code == 200
 
 
 def test_api_call_returns_expected_json(test_url, mock_session, successful_response):
     """Test that successful API call returns expected JSON data."""
-    m, expected_data = successful_response
+    expected_data = successful_response
     response = api_call(mock_session, test_url)
     assert response.json() == expected_data
 
 
 def test_api_call_returns_weather_key(test_url, mock_session, successful_response):
     """Test that successful API call returns weather key in JSON."""
-    m, expected_data = successful_response
+    _ = successful_response
     response = api_call(mock_session, test_url)
     assert "weather" in response.json()
 

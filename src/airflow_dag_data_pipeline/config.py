@@ -31,7 +31,7 @@ class Settings(BaseSettings):
         description="OpenWeather Time Machine endpoint",
     )
     retry_initial_wait_seconds: int = Field(default=1)
-    max_retry_attempts: int = Field(default=3, ge=0, le=10)
+    max_retry_attempts: int = Field(default=3, ge=1, le=10)
     retry_backoff_multiplier: float = Field(default=2.0, gt=0)
     retry_max_wait_seconds: int = Field(default=60, gt=0)
 

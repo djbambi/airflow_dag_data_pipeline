@@ -14,17 +14,7 @@ from tenacity import (
 from airflow_dag_data_pipeline.config import Settings
 
 settings = Settings()
-session = requests.Session()
 logger = logging.getLogger(__name__)
-params: dict[str, str | int | float] = {
-    "lat": 54.9069,
-    "lon": -1.3838,
-    "dt": 1767830400,
-    "appid": settings.openweather_api_key,
-    "units": "metric",
-}
-
-logging.basicConfig(level=logging.INFO)
 
 
 def _should_retry(exception: BaseException) -> bool:
@@ -36,13 +26,24 @@ def _should_retry(exception: BaseException) -> bool:
     Returns:
         True if the request should be retried, False otherwise
     """
-    if isinstance(exception, (requests.Timeout, requests.ConnectionError)):
+    if isinstance(exception, requests.Timeout):
+        logger.debug("Retry triggered by Timeout exception")
+        return True
+    
+    if isinstance(exception, requests.ConnectionError):
+        logger.debug("Retry triggered by ConnectionError exception")
         return True
 
     # HTTP errors - only retry specific codes
     if isinstance(exception, requests.HTTPError):
         if exception.response is not None:
-            return exception.response.status_code in {408, 429, 500, 502, 503, 504}
+            status_code = exception.response.status_code
+            should_retry = status_code in {408, 429, 500, 502, 503, 504}
+            if should_retry:
+                logger.debug(f"Retry triggered by HTTPError with status code {status_code}")
+            else:
+                logger.debug(f"Not retrying HTTPError with status code {status_code}")
+            return should_retry
 
     return False
 
