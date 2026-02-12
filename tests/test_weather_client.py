@@ -1,81 +1,113 @@
-# tests/test_weather_client.py
+"""Tests for the weather client retry logic and API call behavior."""
+
 from unittest.mock import Mock
 
 import pytest
+import requests
+import requests_mock
 
-from airflow_dag_data_pipeline.weather_client import fetch_openweather_data
-
-
-def test_fetch_openweather_data_returns_json_on_success() -> None:
-    # Arrange: create a fake response
-    fake_response = Mock()
-    fake_response.raise_for_status.return_value = None
-    fake_response.json.return_value = {"ok": True}
-
-    # Arrange: create a fake session that returns the fake response
-    fake_session = Mock()
-    fake_session.get.return_value = fake_response
-
-    # Act: call the function under test
-    result = fetch_openweather_data(
-        session=fake_session,
-        url="https://example.com",
-        params={"a": 1},
-        timeout_s=10.0,
-    )
-
-    # Assert: we got back the JSON dict
-    assert result == {"ok": True}
+from airflow_dag_data_pipeline.weather_client import _should_retry, api_call
 
 
-def test_fetch_openweather_data_calls_session_get_with_expected_args() -> None:
-    fake_response = Mock()
-    fake_response.raise_for_status.return_value = None
-    fake_response.json.return_value = {}
-
-    fake_session = Mock()
-    fake_session.get.return_value = fake_response
-
-    url = "https://example.com/weather"
-    params = {"lat": 54.9, "lon": -1.3}
-    timeout_s = 7.5
-
-    fetch_openweather_data(
-        session=fake_session,
-        url=url,
-        params=params,
-        timeout_s=timeout_s,
-    )
-
-    fake_session.get.assert_called_once_with(url, params=params, timeout=timeout_s)
+@pytest.fixture
+def test_url():
+    """Provide a consistent test URL."""
+    return "http://example.com/weather"
 
 
-def test_fetch_openweather_data_raises_when_status_is_error() -> None:
-    fake_response = Mock()
-    fake_response.raise_for_status.side_effect = Exception("HTTP error")
-
-    fake_session = Mock()
-    fake_session.get.return_value = fake_response
-
-    with pytest.raises(Exception, match="HTTP error"):
-        fetch_openweather_data(
-            session=fake_session,
-            url="https://example.com",
-            params={},
-            timeout_s=10.0,
-        )
-
-    fake_response.json.assert_not_called()
+@pytest.fixture
+def mock_session():
+    """Provide a requests Session for testing."""
+    return requests.Session()
 
 
-def test_fetch_openweather_data_raises_when_session_get_times_out() -> None:
-    fake_session = Mock()
-    fake_session.get.side_effect = TimeoutError("timed out")
+@pytest.fixture
+def successful_response(test_url):
+    """Provide a mocked successful API response."""
+    with requests_mock.Mocker() as m:
+        expected_data = {"weather": "sunny", "temp": 20}
+        m.get(test_url, status_code=200, json=expected_data)
+        yield m, expected_data
 
-    with pytest.raises(TimeoutError, match="timed out"):
-        fetch_openweather_data(
-            session=fake_session,
-            url="https://example.com",
-            params={},
-            timeout_s=10.0,
-        )
+
+def test_should_retry_on_timeout():
+    """Timeout errors should be retried."""
+    # Arrange: Create the exception
+    exception = requests.Timeout()
+
+    # Act: Call the function
+    result = _should_retry(exception)
+
+    # Assert: Check it returns True
+    assert result is True
+
+
+def test_should_retry_on_connection_error():
+    """Connection errors should be retried."""
+    # Arrange: Create the exception
+    exception = requests.ConnectionError()
+
+    # Act: Call the function
+    result = _should_retry(exception)
+
+    # Assert: Check it returns True
+    assert result is True
+
+
+@pytest.mark.parametrize("status_code", [408, 429, 500, 502, 503, 504])
+def test_should_retry_on_retryable_http_status(status_code):
+    """HTTP errors with retryable status codes should be retried."""
+    # Arrange: Create HTTPError with the given status code
+    exception = requests.HTTPError()
+    exception.response = Mock(status_code=status_code)
+
+    # Act: Call the function
+    result = _should_retry(exception)
+
+    # Assert: Check it returns True
+    assert result is True
+
+
+@pytest.mark.parametrize(
+    "status_code", [pytest.param(400, id="Bad Request"), 401, 403, 404, 405]
+)
+def test_should_not_retry_on_client_error_status(status_code):
+    """HTTP client errors (4xx) should NOT be retried."""
+    # Arrange: Create HTTPError with the given status code
+    exception = requests.HTTPError()
+    exception.response = Mock(status_code=status_code)
+
+    # Act: Call the function
+    result = _should_retry(exception)
+
+    # Assert: Check it returns False
+    assert result is False
+
+
+def test_api_call_returns_200_status(test_url, mock_session, successful_response):
+    """Test that successful API call returns 200 status."""
+    m, expected_data = successful_response
+    response = api_call(mock_session, test_url)
+    assert response.status_code == 200
+
+
+def test_api_call_returns_expected_json(test_url, mock_session, successful_response):
+    """Test that successful API call returns expected JSON data."""
+    m, expected_data = successful_response
+    response = api_call(mock_session, test_url)
+    assert response.json() == expected_data
+
+
+def test_api_call_returns_weather_key(test_url, mock_session, successful_response):
+    """Test that successful API call returns weather key in JSON."""
+    m, expected_data = successful_response
+    response = api_call(mock_session, test_url)
+    assert "weather" in response.json()
+
+
+def test_api_call_raises_for_status_with_requests_mock(test_url, mock_session):
+    with requests_mock.Mocker() as m:
+        m.get(test_url, status_code=503, text="service unavailable")
+
+        with pytest.raises(requests.HTTPError):
+            api_call(mock_session, test_url)

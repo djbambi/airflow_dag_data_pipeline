@@ -5,7 +5,7 @@ import requests
 from airflow_dag_data_pipeline.config import Settings
 from airflow_dag_data_pipeline.weather_client import (
     DEFAULT_HEADERS,
-    fetch_openweather_data,
+    api_call,
 )
 
 
@@ -23,7 +23,7 @@ def main() -> None:
     session = requests.Session()
     session.headers.update(DEFAULT_HEADERS)
 
-    data = fetch_openweather_data(
+    data = api_call(
         session=session,
         url=str(settings.openweather_base_url),
         params=params,
@@ -31,7 +31,7 @@ def main() -> None:
     )
 
     with open("weather_data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data.json(), f, indent=2)
 
 
 if __name__ == "__main__":
