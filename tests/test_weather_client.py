@@ -86,7 +86,6 @@ def test_should_not_retry_on_client_error_status(status_code):
 
 def test_api_call_returns_200_status(test_url, mock_session, successful_response):
     """Test that successful API call returns 200 status."""
-    m, expected_data = successful_response
     response = api_call(mock_session, test_url)
     assert response.status_code == 200
 
