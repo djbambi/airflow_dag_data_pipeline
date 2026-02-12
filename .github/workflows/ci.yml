@@ -76,5 +76,6 @@ jobs:
       - name: Run mypy
         run: uv run mypy src/
 
+      # Evaluating ty (Astral's beta type checker) - no pre-commit hook available yet
       - name: Run ty
         run: uvx ty check src/
