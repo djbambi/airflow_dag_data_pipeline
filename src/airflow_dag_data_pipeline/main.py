@@ -9,10 +9,11 @@ from airflow_dag_data_pipeline.weather_client import (
     api_call,
 )
 
+logging.basicConfig(level=logging.INFO)
+
 
 def main() -> None:
     settings = Settings()
-    logging.basicConfig(level=logging.INFO)
 
     params: dict[str, str | int | float] = {
         "lat": 54.9069,
