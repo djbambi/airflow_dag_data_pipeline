@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     )
     openweather_timeout_s: float = Field(default=10.0, gt=0)
     openweather_base_url: str = Field(
-        default="https://api.openweathermap.org/data/3.0/onecall/timemachine",
+        default="https://api.openweathermap.org/data/3.0/onecall/day_summary",
         description="OpenWeather Time Machine endpoint",
     )
     retry_initial_wait_seconds: int = Field(default=1)

@@ -15,7 +15,7 @@ def main() -> None:
     params: dict[str, str | int | float] = {
         "lat": 54.9069,
         "lon": -1.3838,
-        "dt": 1767830400,
+        "date": "2026-02-20",
         "appid": settings.openweather_api_key,
         "units": "metric",
     }
