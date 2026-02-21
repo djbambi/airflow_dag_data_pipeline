@@ -5,6 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12.0"
 dependencies = [
+    "pandas>=3.0.1",
+    "pandas-stubs>=3.0.0.260204",
     "pre-commit>=4.5.1",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
