@@ -1,3 +1,4 @@
 from airflow_dag_data_pipeline.weather_transformer import WeatherDataTransformer
+from airflow_dag_data_pipeline.pandas_transformer import PandasWeatherDataTransformer
 
-__all__ = ["WeatherDataTransformer"]
+__all__ = ["WeatherDataTransformer", "PandasWeatherDataTransformer"]
