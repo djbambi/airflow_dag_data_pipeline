@@ -21,23 +21,47 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
 
         return filtered_data
 
-    def _build_records(self, filtered_data: dict) -> list[dict[str, Any]]:
-        records = [
-            {
-                "date": str(d),
-                "morning": response["temperature"]["morning"],
-                "afternoon": response["temperature"]["afternoon"],
-                "evening": response["temperature"]["evening"],
-                "night": response["temperature"]["night"],
-            }
-            for d, response in filtered_data.items()
-        ]
+    def _build_records(
+        self, filtered_data: dict[date, dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        try:
+            records = [
+                {
+                    "date": str(d),
+                    "morning": response["temperature"]["morning"],
+                    "afternoon": response["temperature"]["afternoon"],
+                    "evening": response["temperature"]["evening"],
+                    "night": response["temperature"]["night"],
+                }
+                for d, response in filtered_data.items()
+            ]
+        except KeyError as e:
+            raise ValueError(f"Missing expected temperature field: {e}") from e
         return records
 
     def get_mean_daily_temperature(
         self, data: dict[date, dict[str, Any]], start_date: date, end_date: date
     ) -> dict[str, float]:
+        """Calculate mean daily temperature for a date range.
+
+        Args:
+            data: Dictionary of date objects to API response dicts
+            start_date: Start of date range (inclusive)
+            end_date: End of date range (inclusive)
+
+        Returns:
+            Dictionary mapping ISO format date strings (e.g. "2026-02-14")
+            to mean daily temperature floats. Note: input keys are date
+            objects but output keys are ISO format strings.
+
+        Raises:
+            ValueError: If no data exists in the given date range
+            ValueError: If temperature fields are missing from the data
+        """
         filtered_data = self._filter_data(data, start_date, end_date)
+
+        if not filtered_data:
+            raise ValueError(f"No data found between {start_date} and {end_date}")
 
         records = self._build_records(filtered_data)
 

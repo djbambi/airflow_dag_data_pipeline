@@ -85,3 +85,27 @@ def test_filter_data_excludes_dates_outside_range(sample_date_range_data, transf
             }
         }
     }
+
+
+def test_get_mean_daily_temperature_raises_value_error_for_empty_range(
+    sample_data, transformer
+):
+    """Test that a ValueError is raised when no data exists in the date range."""
+    with pytest.raises(ValueError):
+        transformer.get_mean_daily_temperature(
+            sample_data, date(2026, 3, 1), date(2026, 3, 7)
+        )
+
+
+def test_build_records_raises_value_error_for_missing_temperature_field(transformer):
+    """Test that a ValueError is raised when temperature fields are missing."""
+    invalid_data = {
+        date(2026, 2, 14): {
+            "temperature": {
+                "morning": 4.0,
+                # missing afternoon, evening, night
+            }
+        }
+    }
+    with pytest.raises(ValueError):
+        transformer._build_records(invalid_data)

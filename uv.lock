@@ -149,8 +149,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pandas", specifier = ">=3.0.1" },
-    { name = "pandas-stubs", specifier = ">=3.0.0.260204" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pandas-stubs", specifier = ">=2.0.0" },
     { name = "pre-commit", specifier = ">=4.5.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
