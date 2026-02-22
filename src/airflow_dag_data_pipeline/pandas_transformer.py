@@ -44,4 +44,4 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
         df = pd.DataFrame(records)
         temperature_columns = ["morning", "afternoon", "evening", "night"]
         df["mean_temp"] = df[temperature_columns].mean(axis=1)
-        return df.set_index("date")["mean_temp"].to_dict()
+        return {str(k): float(v) for k, v in df.set_index("date")["mean_temp"].items()}
