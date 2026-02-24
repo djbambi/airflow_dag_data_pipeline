@@ -24,8 +24,6 @@ params: dict[str, str | int | float] = {
     "units": "metric",
 }
 
-logging.basicConfig(level=logging.INFO)
-
 
 def _should_retry(exception: BaseException) -> bool:
     """Determine if an exception should trigger a retry.

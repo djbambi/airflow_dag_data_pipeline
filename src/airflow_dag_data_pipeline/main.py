@@ -1,4 +1,5 @@
 import json
+import logging
 
 import requests
 
@@ -7,6 +8,8 @@ from airflow_dag_data_pipeline.weather_client import (
     DEFAULT_HEADERS,
     api_call,
 )
+
+logging.basicConfig(level=logging.INFO)
 
 
 def main() -> None:
