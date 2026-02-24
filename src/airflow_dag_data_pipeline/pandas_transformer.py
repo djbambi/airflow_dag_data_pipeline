@@ -36,7 +36,10 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
                 for d, response in filtered_data.items()
             ]
         except KeyError as e:
-            raise ValueError(f"Missing expected temperature field: {e}") from e
+            field_name = e.args[0] if e.args else "unknown"
+            raise ValueError(
+                f"Missing expected temperature field: {field_name}"
+            ) from e
         return records
 
     def get_mean_daily_temperature(
@@ -58,6 +61,10 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
             ValueError: If no data exists in the given date range
             ValueError: If temperature fields are missing from the data
         """
+        if start_date > end_date:
+            raise ValueError(
+                "Invalid date range: start_date must be less than or equal to end_date"
+            )
         filtered_data = self._filter_data(data, start_date, end_date)
 
         if not filtered_data:
@@ -68,4 +75,7 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
         df = pd.DataFrame(records)
         temperature_columns = ["morning", "afternoon", "evening", "night"]
         df["mean_temp"] = df[temperature_columns].mean(axis=1)
-        return {str(k): float(v) for k, v in df.set_index("date")["mean_temp"].items()}
+        return {
+            str(k): float(v)
+            for k, v in df.set_index("date")["mean_temp"].to_dict().items()
+        }
