@@ -13,7 +13,7 @@ from tenacity import (
 
 from airflow_dag_data_pipeline.config import Settings
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
 session = requests.Session()
 logger = logging.getLogger(__name__)
 params: dict[str, str | int | float] = {
