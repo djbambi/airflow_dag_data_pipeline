@@ -109,3 +109,16 @@ def test_build_records_raises_value_error_for_missing_temperature_field(transfor
     }
     with pytest.raises(ValueError):
         transformer._build_records(invalid_data)
+
+
+def test_get_mean_daily_temperature_returns_correct_means_for_date_range(
+    sample_date_range_data, transformer
+):
+    t = transformer.get_mean_daily_temperature(
+        sample_date_range_data, date(2026, 2, 14), date(2026, 2, 16)
+    )
+    assert t == {
+        "2026-02-14": 5.0,  # (4.0 + 8.0 + 6.0 + 2.0) / 4
+        "2026-02-15": 5.75,  # (5.0 + 9.0 + 6.0 + 3.0) / 4
+        "2026-02-16": 4.0,  # (3.0 + 7.0 + 5.0 + 1.0) / 4
+    }
