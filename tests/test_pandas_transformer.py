@@ -77,20 +77,6 @@ def test_get_mean_daily_temperature_parametrized(
     assert result == expected
 
 
-def test_returns_dict(transformer):
-    t = transformer.get_mean_daily_temperature(
-        SAMPLE_DATE_RANGE_DATA, date(2026, 2, 1), date(2026, 2, 28)
-    )
-    assert isinstance(t, dict)
-
-
-def test_get_mean_daily_temperature_returns_correct_mean(transformer):
-    t = transformer.get_mean_daily_temperature(
-        SAMPLE_DATE_RANGE_DATA, date(2026, 2, 14), date(2026, 2, 14)
-    )
-    assert t == {"2026-02-14": 5.0}
-
-
 def test_get_mean_daily_temperature_raises_for_inverted_date_range(transformer):
     with pytest.raises(ValueError):
         transformer.get_mean_daily_temperature(
@@ -134,17 +120,6 @@ def test_build_records_raises_value_error_for_missing_temperature_field(transfor
     }
     with pytest.raises(ValueError):
         transformer._build_records(invalid_data)
-
-
-def test_get_mean_daily_temperature_returns_correct_means_for_date_range(transformer):
-    t = transformer.get_mean_daily_temperature(
-        SAMPLE_DATE_RANGE_DATA, date(2026, 2, 14), date(2026, 2, 16)
-    )
-    assert t == {
-        "2026-02-14": 5.0,  # (4.0 + 8.0 + 6.0 + 2.0) / 4
-        "2026-02-15": 5.75,  # (5.0 + 9.0 + 6.0 + 3.0) / 4
-        "2026-02-16": 4.0,  # (3.0 + 7.0 + 5.0 + 1.0) / 4
-    }
 
 
 def test_get_mean_daily_temperature_with_extreme_values(transformer):
