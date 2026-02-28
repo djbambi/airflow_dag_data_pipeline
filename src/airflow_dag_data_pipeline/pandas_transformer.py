@@ -37,9 +37,7 @@ class PandasWeatherDataTransformer(WeatherDataTransformer):
             ]
         except KeyError as e:
             field_name = e.args[0] if e.args else "unknown"
-            raise ValueError(
-                f"Missing expected temperature field: {field_name}"
-            ) from e
+            raise ValueError(f"Missing expected temperature field: {field_name}") from e
         return records
 
     def get_mean_daily_temperature(
