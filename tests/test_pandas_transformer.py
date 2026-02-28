@@ -61,20 +61,6 @@ def transformer():
     return PandasWeatherDataTransformer()
 
 
-# @pytest.fixture
-# def sample_data():
-#     return {
-#         date(2026, 2, 14): {
-#             "temperature": {
-#                 "morning": 4.0,
-#                 "afternoon": 8.0,
-#                 "evening": 6.0,
-#                 "night": 2.0,
-#             }
-#         },
-#     }
-
-
 # mean = (4.0 + 8.0 + 6.0 + 2.0) / 4 = 5.0
 
 
@@ -159,3 +145,20 @@ def test_get_mean_daily_temperature_returns_correct_means_for_date_range(transfo
         "2026-02-15": 5.75,  # (5.0 + 9.0 + 6.0 + 3.0) / 4
         "2026-02-16": 4.0,  # (3.0 + 7.0 + 5.0 + 1.0) / 4
     }
+
+
+def test_get_mean_daily_temperature_with_extreme_values(transformer):
+    extreme_data = {
+        date(2026, 2, 14): {
+            "temperature": {
+                "morning": -9999.9,
+                "afternoon": 9999.9,
+                "evening": -9999.9,
+                "night": 9999.9,
+            }
+        }
+    }
+    result = transformer.get_mean_daily_temperature(
+        extreme_data, date(2026, 2, 14), date(2026, 2, 14)
+    )
+    assert result == {"2026-02-14": 0.0}
