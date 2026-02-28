@@ -4,6 +4,45 @@ import pytest
 
 from airflow_dag_data_pipeline.pandas_transformer import PandasWeatherDataTransformer
 
+SAMPLE_DATES_EXPECTED = [
+    # Single date - first entry
+    (
+        date(2026, 2, 14),
+        date(2026, 2, 14),
+        {"2026-02-14": 5.0},  # (4.0 + 8.0 + 6.0 + 2.0) / 4
+    ),
+    # Single date - middle entry
+    (
+        date(2026, 2, 15),
+        date(2026, 2, 15),
+        {"2026-02-15": 5.75},  # (5.0 + 9.0 + 6.0 + 3.0) / 4
+    ),
+    # Single date - last entry
+    (
+        date(2026, 2, 16),
+        date(2026, 2, 16),
+        {"2026-02-16": 4.0},  # (3.0 + 7.0 + 5.0 + 1.0) / 4
+    ),
+    # Two consecutive dates
+    (
+        date(2026, 2, 14),
+        date(2026, 2, 15),
+        {"2026-02-14": 5.0, "2026-02-15": 5.75},
+    ),
+    # Full range
+    (
+        date(2026, 2, 14),
+        date(2026, 2, 16),
+        {"2026-02-14": 5.0, "2026-02-15": 5.75, "2026-02-16": 4.0},
+    ),
+    # Range wider than available data - should return all available dates
+    (
+        date(2026, 2, 1),
+        date(2026, 2, 28),
+        {"2026-02-14": 5.0, "2026-02-15": 5.75, "2026-02-16": 4.0},
+    ),
+]
+
 
 @pytest.fixture
 def transformer():
@@ -55,6 +94,19 @@ def sample_date_range_data():
 
 
 # mean = (4.0 + 8.0 + 6.0 + 2.0) / 4 = 5.0
+
+
+# --- Parametrized tests for get_mean_daily_temperature ---
+# Each test case is: (start_date, end_date, expected_result)
+# Using sample_date_range_data which has dates 2026-02-14, 2026-02-15, 2026-02-16
+@pytest.mark.parametrize("start_date, end_date, expected", SAMPLE_DATES_EXPECTED)
+def test_get_mean_daily_temperature_parametrized(
+    sample_date_range_data, transformer, start_date, end_date, expected
+):
+    result = transformer.get_mean_daily_temperature(
+        sample_date_range_data, start_date, end_date
+    )
+    assert result == expected
 
 
 def test_returns_dict(sample_data, transformer):
