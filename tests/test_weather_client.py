@@ -54,7 +54,17 @@ def test_should_retry_on_connection_error():
     assert result is True
 
 
-@pytest.mark.parametrize("status_code", [408, 429, 500, 502, 503, 504])
+@pytest.mark.parametrize(
+    "status_code",
+    [
+        pytest.param(408, id="Request Timeout"),
+        pytest.param(429, id="Too Many Requests"),
+        pytest.param(500, id="Internal Server Error"),
+        pytest.param(502, id="Bad Gateway"),
+        pytest.param(503, id="Service Unavailable"),
+        pytest.param(504, id="Gateway Timeout"),
+    ],
+)
 def test_should_retry_on_retryable_http_status(status_code):
     """HTTP errors with retryable status codes should be retried."""
     # Arrange: Create HTTPError with the given status code
